@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NJZ头像生成器</title>
+</head>
+<body>
+    <h2>上传图片，自动抠图并合成头像</h2>
+    <input type="file" id="upload" />
+    <img id="preview" />
+    <button id="download">下载头像</button>
+
+    <script>
+        document.getElementById('upload').addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) return;
+            
+            let reader = new FileReader();
+            reader.onload = function(event) {
+                document.getElementById("preview").src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    </script>
+</body>
+</html>
