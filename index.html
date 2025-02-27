@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>透明背景头像合成器</title>
+    <title>NJZ头像生成器</title>
     <style>
         /* Reset some default styles */
         * {
@@ -103,30 +103,6 @@
             font-style: italic;
         }
         
-        /* 背景选择器 */
-        .bg-selector {
-            margin: 15px 0;
-            display: flex;
-            flex-wrap: wrap;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .bg-option {
-            width: 60px;
-            height: 60px;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            cursor: pointer;
-            background-size: cover;
-            background-position: center;
-        }
-        
-        .bg-option.selected {
-            border-color: #4CAF50;
-            box-shadow: 0 0 8px rgba(76, 175, 80, 0.6);
-        }
-        
         .instructions {
             margin: 15px auto;
             max-width: 600px;
@@ -153,25 +129,16 @@
     </style>
 </head>
 <body>
-    <h2>透明背景头像合成器</h2>
+    <h2>NJZ头像生成器</h2>
     
     <div class="instructions">
         <h3>使用说明：</h3>
         <ul>
-            <li>上传<strong>透明背景</strong>的PNG图片(推荐提前使用其他工具抠图)</li>
-            <li>选择喜欢的背景图片</li>
+            <li>上传<strong>透明背景</strong>的<strong>PNG</strong>图片（如有魔法可尝试用<a href="https://www.remove.bg/zh/upload" target="_blank">链接</a>扣图）</li>
             <li>拖拽图片调整位置</li>
             <li>使用鼠标滚轮或双指缩放调整大小</li>
             <li>完成后点击下载按钮保存头像</li>
         </ul>
-    </div>
-    
-    <!-- 背景选择 -->
-    <div class="bg-selector">
-        <div class="bg-option selected" style="background-image: url('bg1.jpeg');" data-bg="bg1.jpeg"></div>
-        <div class="bg-option" style="background-image: url('bg2.jpeg');" data-bg="bg2.jpeg"></div>
-        <div class="bg-option" style="background-image: url('bg3.jpeg');" data-bg="bg3.jpeg"></div>
-        <!-- 可以添加更多背景选项 -->
     </div>
     
     <!-- 文件上传 -->
@@ -194,9 +161,7 @@
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const loadingText = document.getElementById('loading');
-        const bgOptions = document.querySelectorAll('.bg-option');
         
-        let currentBg = 'bg.jpeg'; // 默认背景
         let imageObj = new Image(); // 用户上传的图片
         let bgImage = new Image(); // 背景图
         let scale = 1.0, imgX = 0, imgY = 0; // 变量定义
@@ -207,35 +172,15 @@
         canvas.width = 500; 
         canvas.height = 500;
         
-        // 背景选择功能
-        bgOptions.forEach(option => {
-            option.addEventListener('click', function() {
-                // 移除之前的选中状态
-                bgOptions.forEach(opt => opt.classList.remove('selected'));
-                // 添加新的选中状态
-                this.classList.add('selected');
-                // 更新背景
-                currentBg = this.getAttribute('data-bg');
-                // 加载新背景
-                loadBackground();
-            });
-        });
-        
         // 加载背景图片
-        function loadBackground() {
-            bgImage = new Image();
-            bgImage.src = currentBg;
-            bgImage.onload = () => {
-                drawCanvas();
-            };
-            bgImage.onerror = () => {
-                console.error("背景图加载失败:", currentBg);
-                alert("背景图加载失败，请检查图片路径是否正确");
-            };
-        }
-        
-        // 初始加载默认背景
-        loadBackground();
+        bgImage.src = "bg.jpeg";
+        bgImage.onload = () => {
+            drawCanvas();
+        };
+        bgImage.onerror = () => {
+            console.error("背景图加载失败");
+            alert("背景图加载失败，请检查图片路径是否正确");
+        };
 
         // 上传图片处理
         uploadInput.addEventListener('change', function () {
@@ -437,7 +382,7 @@
             
             // 创建下载链接
             const link = document.createElement("a");
-            link.download = "avatar.png";
+            link.download = "njz-avatar.png";
             link.href = canvas.toDataURL("image/png");
             link.click();
         });
