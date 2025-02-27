@@ -3,57 +3,238 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NJZ头像生成器</title>
+    <title>头像生成器</title>
+    <style>
+        /* Reset some default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f0f0f5;
+            color: #333;
+            text-align: center;
+            padding: 20px;
+        }
+
+        h2 {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        #upload {
+            font-size: 1rem;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        #upload:hover {
+            background-color: #45a049;
+        }
+
+        #canvas-container {
+            position: relative;
+            display: inline-block;
+            touch-action: none;
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            background-color: white;
+        }
+
+        canvas {
+            max-width: 100%;
+            max-height: 80vh;
+            touch-action: none;
+            background: #ccc; /* 方便查看 */
+            border: 1px solid #ddd;
+        }
+
+        #download {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #008CBA;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+
+        #download:hover {
+            background-color: #007B8F;
+        }
+
+        /* 上传框 */
+        input[type="file"] {
+            display: none;
+        }
+
+        label[for="upload"] {
+            cursor: pointer;
+            display: inline-block;
+            padding: 10px 20px;
+            background-color: #4CAF50;
+            color: white;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        label[for="upload"]:hover {
+            background-color: #45a049;
+        }
+
+    </style>
 </head>
 <body>
-    <h2>上传图片，自动抠图并合成头像</h2>
+    <h2>上传图片，自动抠图并调整头像</h2>
+    
+    <!-- 文件上传 -->
+    <label for="upload">选择文件</label>
     <input type="file" id="upload" accept="image/*">
-    <img id="preview" style="max-width: 300px; display: none;">
-    <button id="download" style="display: none;">下载抠图结果</button>
-    
+    <br><br>
+
+    <!-- Canvas区域 -->
+    <div id="canvas-container">
+        <canvas id="canvas"></canvas>
+    </div>
+
+    <br>
+    <!-- 下载按钮 -->
+    <button id="download">下载头像</button>
+
     <script>
-    document.getElementById('upload').addEventListener('change', async function() {
-        const file = this.files[0];
-        if (!file) return;
-    
-        let formData = new FormData();
-        formData.append("image", file);
-    
-        try {
-            let response = await fetch("http://127.0.0.1:5001/process", {
-                method: "POST",
-                body: formData
-            });
-    
-            if (!response.ok) {
-                alert("抠图失败，请检查后端！");
+        const uploadInput = document.getElementById('upload');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let imageObj = new Image(); // 抠图后的人物
+        let bgImage = new Image(); // 背景图
+        let scale = 1.0, imgX = 100, imgY = 100; // 变量定义
+        let isDragging = false, lastTouchDist = 0;
+
+        // **1. 载入背景图片**
+        bgImage.src = "bg.jpeg"; // 确保路径正确
+        bgImage.onload = () => {
+            canvas.width = bgImage.width;
+            canvas.height = bgImage.height;
+            drawCanvas();  // **先绘制背景**
+        };
+
+        // **2. 上传图片并调用后端**
+        uploadInput.addEventListener('change', async function () {
+            const file = this.files[0];
+            if (!file) return;
+
+            let formData = new FormData();
+            formData.append("image", file);
+
+            try {
+                let response = await fetch("http://127.0.0.1:5001/process", {
+                    method: "POST",
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    alert("抠图失败，请检查后端！");
+                    return;
+                }
+
+                let blob = await response.blob();
+                imageObj.src = URL.createObjectURL(blob);
+
+                imageObj.onload = () => {
+                    imgX = (canvas.width - imageObj.width) / 2;
+                    imgY = (canvas.height - imageObj.height) / 2;
+                    scale = 1.0;
+                    drawCanvas();  // **图片加载后重新绘制**
+                };
+
+            } catch (error) {
+                console.error("请求后端失败:", error);
+                alert("服务器未响应，请检查 Flask 是否在运行！");
+            }
+        });
+
+        // **3. 画布绘制**
+        function drawCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height); // **绘制背景**
+            if (imageObj.complete && imageObj.naturalWidth > 0) { 
+                ctx.drawImage(imageObj, imgX, imgY, imageObj.width * scale, imageObj.height * scale);
+            }
+        }
+
+        // **4. 拖拽 & 触摸事件**
+        canvas.addEventListener("mousedown", (e) => {
+            isDragging = true;
+            startX = e.clientX - imgX;
+            startY = e.clientY - imgY;
+        });
+
+        canvas.addEventListener("mousemove", (e) => {
+            if (isDragging) {
+                imgX = e.clientX - startX;
+                imgY = e.clientY - startY;
+                drawCanvas();
+            }
+        });
+
+        canvas.addEventListener("mouseup", () => isDragging = false);
+        canvas.addEventListener("mouseleave", () => isDragging = false);
+
+        // 触摸支持
+        canvas.addEventListener("touchstart", (e) => {
+            if (e.touches.length === 1) {
+                isDragging = true;
+                startX = e.touches[0].clientX - imgX;
+                startY = e.touches[0].clientY - imgY;
+            } else if (e.touches.length === 2) {
+                lastTouchDist = getTouchDistance(e.touches);
+            }
+        });
+
+        canvas.addEventListener("touchmove", (e) => {
+            if (isDragging && e.touches.length === 1) {
+                imgX = e.touches[0].clientX - startX;
+                imgY = e.touches[0].clientY - startY;
+                drawCanvas();
+            } else if (e.touches.length === 2) {
+                let newDist = getTouchDistance(e.touches);
+                scale *= newDist / lastTouchDist;
+                lastTouchDist = newDist;
+                drawCanvas();
+            }
+        });
+
+        canvas.addEventListener("touchend", () => isDragging = false);
+
+        function getTouchDistance(touches) {
+            let dx = touches[0].clientX - touches[1].clientX;
+            let dy = touches[0].clientY - touches[1].clientY;
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        // **5. 下载头像**
+        document.getElementById("download").addEventListener("click", function () {
+            if (!imageObj.src) {
+                alert("请先上传图片！");
                 return;
             }
-    
-            let blob = await response.blob();
-            let url = URL.createObjectURL(blob);
-    
-            // 显示抠图结果
-            let preview = document.getElementById("preview");
-            preview.src = url;
-            preview.style.display = "block";
-    
-            // 下载按钮
-            let downloadBtn = document.getElementById("download");
-            downloadBtn.style.display = "block";
-            downloadBtn.onclick = function() {
-                let a = document.createElement("a");
-                a.href = url;
-                a.download = "avatar.png";
-                a.click();
-            };
-    
-        } catch (error) {
-            console.error("请求后端失败:", error);
-            alert("服务器未响应，请检查 Flask 是否在运行！");
-        }
-    });
+            let link = document.createElement("a");
+            link.download = "avatar.png";
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+
     </script>
-    
 </body>
 </html>
