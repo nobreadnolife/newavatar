@@ -28,7 +28,3 @@ def process_image():
     output.save(img_io, format="PNG")
     img_io.seek(0)
     return send_file(img_io, mimetype="image/png")
-
-if __name__ == '__main__':
-    print("Flask 服务器即将启动...")
-    app.run(debug=True, host="0.0.0.0", port=5001)
