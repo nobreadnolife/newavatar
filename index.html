@@ -60,7 +60,7 @@
             border: 1px solid #ddd;
         }
 
-        #download {
+        #generate-btn {
             margin-top: 20px;
             padding: 10px 20px;
             background-color: #008CBA;
@@ -72,8 +72,13 @@
             transition: background-color 0.3s;
         }
 
-        #download:hover {
+        #generate-btn:hover {
             background-color: #007B8F;
+        }
+        
+        #generate-btn:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
         }
 
         /* 上传框 */
@@ -137,7 +142,7 @@
             <li>上传<strong>透明背景</strong>的<strong>PNG</strong>图片（如有魔法可尝试用<a href="https://www.remove.bg/zh/upload" target="_blank">链接</a>扣图）</li>
             <li>拖拽图片调整位置</li>
             <li>使用鼠标滚轮或双指缩放调整大小</li>
-            <li>完成后点击下载按钮保存头像</li>
+            <li>点击"生成头像"按钮查看并保存</li>
         </ul>
     </div>
     
@@ -153,14 +158,20 @@
     </div>
 
     <br>
-    <!-- 下载按钮 -->
-    <button id="download">下载头像</button>
+    <!-- 生成按钮 -->
+    <button id="generate-btn" disabled>生成头像</button>
+
+    <!-- 隐藏的输出Canvas -->
+    <canvas id="output-canvas" style="display: none;"></canvas>
 
     <script>
         const uploadInput = document.getElementById('upload');
         const canvas = document.getElementById('canvas');
         const ctx = canvas.getContext('2d');
         const loadingText = document.getElementById('loading');
+        const generateBtn = document.getElementById('generate-btn');
+        const outputCanvas = document.getElementById('output-canvas');
+        const outputCtx = outputCanvas.getContext('2d');
         
         let imageObj = new Image(); // 用户上传的图片
         let bgImage = new Image(); // 背景图
@@ -171,6 +182,11 @@
         // 设置Canvas大小（这里假设背景图为正方形）
         canvas.width = 500; 
         canvas.height = 500;
+        
+        // 设置输出Canvas大小（更高分辨率）
+        const outputSize = 1200;
+        outputCanvas.width = outputSize;
+        outputCanvas.height = outputSize;
         
         // 加载背景图片
         bgImage.src = "bg.jpeg";
@@ -208,6 +224,7 @@
                     scale = 1.0;
                     drawCanvas();
                     loadingText.style.display = "none";
+                    generateBtn.disabled = false;
                 };
                 
                 imageObj.onerror = () => {
@@ -373,18 +390,88 @@
             return Math.sqrt(dx * dx + dy * dy);
         }
 
-        // 下载合成后的头像
-        document.getElementById("download").addEventListener("click", function () {
+        // 生成高质量头像并在新窗口中显示
+        generateBtn.addEventListener("click", function () {
             if (!imageObj.complete || imageObj.naturalWidth === 0) {
                 alert("请先上传PNG图片！");
                 return;
             }
             
-            // 创建下载链接
-            const link = document.createElement("a");
-            link.download = "njz-avatar.png";
-            link.href = canvas.toDataURL("image/png");
-            link.click();
+            // 在高分辨率画布上重新绘制
+            outputCtx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
+            
+            // 绘制背景（缩放到高分辨率）
+            if (bgImage.complete && bgImage.naturalWidth > 0) {
+                outputCtx.drawImage(bgImage, 0, 0, outputCanvas.width, outputCanvas.height);
+            }
+            
+            // 计算缩放比例
+            const scaleFactor = outputSize / canvas.width;
+            
+            // 绘制用户上传的图片（缩放到高分辨率）
+            if (imageObj.complete && imageObj.naturalWidth > 0) { 
+                outputCtx.drawImage(
+                    imageObj, 
+                    imgX * scaleFactor, 
+                    imgY * scaleFactor, 
+                    imageObj.width * scale * scaleFactor, 
+                    imageObj.height * scale * scaleFactor
+                );
+            }
+            
+            // 获取图像数据并打开新窗口
+            const dataUrl = outputCanvas.toDataURL("image/png");
+            
+            // 打开新窗口并显示结果
+            const newWindow = window.open();
+            newWindow.document.write(`
+                <!DOCTYPE html>
+                <html lang="zh">
+                <head>
+                    <meta charset="UTF-8">
+                    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+                    <title>NJZ头像</title>
+                    <style>
+                        body {
+                            font-family: 'Arial', sans-serif;
+                            background-color: #f0f0f5;
+                            margin: 0;
+                            padding: 20px;
+                            display: flex;
+                            flex-direction: column;
+                            align-items: center;
+                            justify-content: center;
+                            min-height: 100vh;
+                            text-align: center;
+                        }
+                        .avatar-container {
+                            background-color: white;
+                            padding: 20px;
+                            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+                            max-width: 100%;
+                            border-radius: 10px;
+                        }
+                        img {
+                            max-width: 100%;
+                            height: auto;
+                            margin-bottom: 20px;
+                            border-radius: 5px;
+                        }
+                        p {
+                            color: #666;
+                            margin-bottom: 20px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="avatar-container">
+                        <img src="${dataUrl}" alt="Generated Avatar">
+                        <p>长按图片保存头像</p>
+                    </div>
+                </body>
+                </html>
+            `);
+            newWindow.document.close();
         });
     </script>
 </body>
