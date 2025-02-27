@@ -6,15 +6,21 @@
     <title>NJZ头像生成器</title>
     <link rel="icon" href="favicon.ico" type="image/x-icon">
     <style>
-        /* 自定义字体定义 */
         @font-face {
-            font-family: 'YaheiHeavy';
-            src: url('yaheiheavy.ttf') format('truetype');
+            font-family: 'TianWangXing-Pixel-Font';
+            src: url('TianWangXing-Pixel-Font.ttf') format('truetype');
             font-weight: normal;
             font-style: normal;
         }
 
-        /* Reset some default styles */
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;700&display=swap');
+        
+        :root {
+            --primary-color: #6A5ACD;
+            --text-color: #333;
+            --bg-color: #F4F6FA;
+        }
+
         * {
             margin: 0;
             padding: 0;
@@ -22,163 +28,137 @@
         }
 
         body {
-            font-family: 'Arial', sans-serif;
-            background-image: url('dreamscape-bg.jpg'); /* 梦幻星空背景图片 */
-            background-size: cover;
-            background-position: center;
-            background-attachment: fixed;
-            color: #fff; /* 更改文字颜色为白色以便在深色背景上更易读 */
-            text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5); /* 添加文字阴影增加可读性 */
-            text-align: center;
+            font-family: 'Noto Sans SC', 'Microsoft YaHei', sans-serif;
+            background-color: var(--bg-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
             padding: 20px;
+            color: var(--text-color);
+        }
+
+        .container {
+            background-color: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            width: 100%;
+            max-width: 450px;
+            padding: 30px;
+        }
+
+        h1 {
+            text-align: center;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.8rem;
         }
 
         .instructions {
-            margin: 15px auto;
-            max-width: 600px;
-            text-align: left;
-            background-color: rgba(255, 255, 255, 0.8);
-            color: #333; /* 深色文字在浅色背景上 */
-            text-shadow: none; /* 移除文字阴影 */
+            background-color: rgba(106, 90, 205, 0.05);
+            border-left: 4px solid var(--primary-color);
             padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
-            backdrop-filter: blur(3px);
-            -webkit-backdrop-filter: blur(3px);
+            margin-bottom: 20px;
+            border-radius: 4px;
         }
-        
-        .instructions h3 {
-            margin-bottom: 10px;
-            color: #333;
-        }
-        
+
         .instructions ul {
+            list-style-type: none;
+            padding-left: 10px;
+        }
+
+        .instructions li {
+            margin-bottom: 8px;
+            position: relative;
             padding-left: 20px;
         }
-        
-        .instructions li {
-            margin-bottom: 5px;
+
+        .instructions li:before {
+            content: '•';
+            color: var(--primary-color);
+            position: absolute;
+            left: 0;
         }
 
-        #upload {
-            font-size: 1rem;
-            padding: 10px;
-            background-color: #4CAF50;
+        .upload-btn, #generate-btn {
+            display: block;
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 12px;
+            background-color: var(--primary-color);
             color: white;
             border: none;
+            border-radius: 50px;
+            text-align: center;
+            margin-bottom: 20px;
             cursor: pointer;
-            border-radius: 5px;
             transition: background-color 0.3s;
+            font-size: 1rem;
         }
 
-        #upload:hover {
-            background-color: #45a049;
+        .upload-btn:hover, #generate-btn:not(:disabled):hover {
+            background-color: #5A4ACD;
         }
 
         #canvas-container {
-            position: relative;
-            display: inline-block;
-            touch-action: none;
-            border: 3px solid rgba(255, 255, 255, 0.5);
-            border-radius: 10px;
-            margin-top: 20px;
-            background-color: transparent;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            aspect-ratio: 1 / 1;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
             overflow: hidden;
         }
 
         canvas {
             max-width: 100%;
-            max-height: 80vh;
-            touch-action: none;
-            background-repeat: no-repeat;
-            background-position: center;
-            background-size: cover;
-            border-radius: 8px;
+            max-height: 100%;
+            object-fit: contain;
         }
 
         #generate-btn {
-            margin-top: 20px;
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #8a2be2, #4169e1); /* 紫蓝渐变色调 */
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 1.1rem;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            box-shadow: 0 4px 10px rgba(65, 105, 225, 0.5);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+            background-color: #888;
+            margin-bottom: 0;
         }
 
-        #generate-btn:hover {
-            background: linear-gradient(135deg, #9b4dff, #567df4);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(65, 105, 225, 0.6);
+        #generate-btn:not(:disabled) {
+            background-color: var(--primary-color);
         }
-        
+
         #generate-btn:disabled {
-            background: linear-gradient(135deg, #a9a9a9, #d3d3d3);
             cursor: not-allowed;
-            transform: none;
-            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
         }
 
-        /* 上传框 */
         input[type="file"] {
             display: none;
-        }
-
-        label[for="upload"] {
-            cursor: pointer;
-            display: inline-block;
-            padding: 12px 25px;
-            background: linear-gradient(135deg, #9932cc, #8a2be2); /* 紫色渐变 */
-            color: white;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            box-shadow: 0 4px 10px rgba(138, 43, 226, 0.5);
-            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
-        }
-
-        label[for="upload"]:hover {
-            background: linear-gradient(135deg, #a64dff, #9b4dff);
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(138, 43, 226, 0.6);
         }
     </style>
 </head>
 <body>
-    <h2 style="font-size: 2.5rem; margin-bottom: 25px; color: #FFFFFF; font-family: 'YaheiHeavy', 'Microsoft YaHei', sans-serif; font-weight: bold; -webkit-text-stroke: 0px #7575AB; text-stroke: 0px #7575AB;">NJZ头像生成器</h2>
-    
-    <div class="instructions">
-        <h3>使用说明：</h3>
-        <ul>
-            <li>上传<strong>透明背景</strong>的<strong>PNG</strong>图片（如有魔法可尝试用<a href="https://www.remove.bg/zh/upload" target="_blank">链接</a>扣图）</li>
-            <li>拖拽图片调整位置</li>
-            <li>使用鼠标滚轮或双指缩放调整大小</li>
-            <li>点击"生成头像"按钮查看并保存</li>
-        </ul>
-    </div>
-    
-    <!-- 文件上传 -->
-    <div style="margin: 25px auto; text-align: center; width: 100%;">
-        <label for="upload">选择透明PNG图片</label>
+    <div class="container">
+        <h1>NJZ头像生成器</h1>
+        
+        <div class="instructions">
+            <ul>
+                <li>上传透明背景的PNG图片（<a href="https://www.remove.bg/zh/upload" target="_blank" style="color: var(--primary-color);">在线抠图工具</a>）</li>
+                <li>拖动图片调整位置</li>
+                <li>使用滚轮或双指缩放</li>
+                <li>点击"生成头像"查看保存</li>
+            </ul>
+        </div>
+        
+        <label for="upload" class="upload-btn">上传PNG图片</label>
         <input type="file" id="upload" accept="image/png">
-    </div>
-    
-    <!-- Canvas区域 -->
-    <div id="canvas-container">
-        <canvas id="canvas"></canvas>
+
+        <div id="canvas-container">
+            <canvas id="canvas"></canvas>
+        </div>
+
+        <button id="generate-btn" disabled>生成头像</button>
     </div>
 
-    <br>
-    <!-- 生成按钮 -->
-    <button id="generate-btn" disabled>生成头像</button>
-
-    <!-- 隐藏的输出Canvas -->
     <canvas id="output-canvas" style="display: none;"></canvas>
 
     <script>
@@ -188,44 +168,44 @@
         const generateBtn = document.getElementById('generate-btn');
         const outputCanvas = document.getElementById('output-canvas');
         const outputCtx = outputCanvas.getContext('2d');
+        const canvasContainer = document.getElementById('canvas-container');
         
-        let imageObj = new Image(); // 用户上传的图片
-        let bgImage = new Image(); // 背景图
-        let scale = 1.0, imgX = 0, imgY = 0; // 变量定义
+        let imageObj = new Image();
+        let bgImage = new Image();
+        let scale = 1.0, imgX = 0, imgY = 0;
         let isDragging = false, lastTouchDist = 0;
         let startX, startY;
 
-        // 设置Canvas大小（这里假设背景图为正方形）
-        canvas.width = 500; 
-        canvas.height = 500;
-        
-        // 设置输出Canvas大小（更高分辨率）
-        const outputSize = 1200;
-        outputCanvas.width = outputSize;
-        outputCanvas.height = outputSize;
-        
+        // 根据容器动态设置画布大小
+        function resizeCanvas() {
+            const containerWidth = canvasContainer.clientWidth;
+            canvas.width = containerWidth;
+            canvas.height = containerWidth;
+
+            // 高分辨率输出画布
+            const outputSize = 1200;
+            outputCanvas.width = outputSize;
+            outputCanvas.height = outputSize;
+        }
+
+        // 初始化时和窗口大小变化时调整画布
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+
         // 加载背景图片
         bgImage.src = "bg.jpeg";
         bgImage.onload = () => {
             drawCanvas();
         };
-        bgImage.onerror = () => {
-            console.error("背景图加载失败");
-            alert("背景图加载失败，请检查图片路径是否正确");
-        };
 
         // 上传图片处理
         uploadInput.addEventListener('change', function () {
             const file = this.files[0];
-            if (!file) return;
-            
-            // 仅接受PNG图片
-            if (!file.type.match('image/png')) {
+            if (!file || !file.type.match('image/png')) {
                 alert("请上传PNG格式的图片！");
                 return;
             }
             
-            // 读取用户上传的图片
             const reader = new FileReader();
             reader.onload = function(e) {
                 imageObj = new Image();
@@ -239,14 +219,6 @@
                     drawCanvas();
                     generateBtn.disabled = false;
                 };
-                
-                imageObj.onerror = () => {
-                    alert("图片加载失败，请检查图片格式");
-                };
-            };
-            
-            reader.onerror = function() {
-                alert("读取文件时出错");
             };
             
             reader.readAsDataURL(file);
@@ -307,24 +279,17 @@
             if (imageObj.complete && imageObj.naturalWidth > 0) {
                 e.preventDefault();
                 
-                // 获取鼠标位置相对于图片的坐标
                 const mouseX = e.clientX - canvas.getBoundingClientRect().left;
                 const mouseY = e.clientY - canvas.getBoundingClientRect().top;
                 
-                // 计算鼠标相对于图片的偏移
                 const x = mouseX - imgX;
                 const y = mouseY - imgY;
                 
-                // 根据滚轮方向确定缩放方向
                 const delta = e.deltaY < 0 ? 1.1 : 0.9;
                 
-                // 应用缩放
                 scale *= delta;
-                
-                // 限制最小和最大缩放
                 scale = Math.max(0.1, Math.min(5, scale));
                 
-                // 调整位置，使鼠标下的点保持不变
                 imgX = mouseX - x * delta;
                 imgY = mouseY - y * delta;
                 
@@ -332,7 +297,7 @@
             }
         });
 
-        // 触摸事件 - 拖拽
+        // 触摸事件 - 拖拽和缩放
         canvas.addEventListener("touchstart", (e) => {
             if (imageObj.complete && imageObj.naturalWidth > 0) {
                 if (e.touches.length === 1) {
@@ -340,7 +305,6 @@
                     startX = e.touches[0].clientX - imgX;
                     startY = e.touches[0].clientY - imgY;
                 } else if (e.touches.length === 2) {
-                    // 记录两个触摸点的距离，用于缩放
                     lastTouchDist = getTouchDistance(e.touches);
                 }
                 e.preventDefault();
@@ -352,30 +316,22 @@
                 e.preventDefault();
                 
                 if (isDragging && e.touches.length === 1) {
-                    // 单指拖动
                     imgX = e.touches[0].clientX - startX;
                     imgY = e.touches[0].clientY - startY;
                     drawCanvas();
                 } else if (e.touches.length === 2) {
-                    // 双指缩放
                     const newDist = getTouchDistance(e.touches);
                     const delta = newDist / lastTouchDist;
                     
-                    // 计算双指中心点
                     const centerX = (e.touches[0].clientX + e.touches[1].clientX) / 2 - canvas.getBoundingClientRect().left;
                     const centerY = (e.touches[0].clientY + e.touches[1].clientY) / 2 - canvas.getBoundingClientRect().top;
                     
-                    // 计算中心点相对于图片的偏移
                     const x = centerX - imgX;
                     const y = centerY - imgY;
                     
-                    // 应用缩放
                     scale *= delta;
-                    
-                    // 限制最小和最大缩放
                     scale = Math.max(0.1, Math.min(5, scale));
                     
-                    // 调整位置，使中心点保持不变
                     imgX = centerX - x * delta;
                     imgY = centerY - y * delta;
                     
@@ -388,7 +344,6 @@
         canvas.addEventListener("touchend", (e) => {
             isDragging = false;
             if (e.touches.length < 2) {
-                // 如果少于两个触摸点，取消缩放状态
                 lastTouchDist = 0;
             }
             e.preventDefault();
@@ -408,18 +363,14 @@
                 return;
             }
             
-            // 在高分辨率画布上重新绘制
             outputCtx.clearRect(0, 0, outputCanvas.width, outputCanvas.height);
             
-            // 绘制背景（缩放到高分辨率）
             if (bgImage.complete && bgImage.naturalWidth > 0) {
                 outputCtx.drawImage(bgImage, 0, 0, outputCanvas.width, outputCanvas.height);
             }
             
-            // 计算缩放比例
-            const scaleFactor = outputSize / canvas.width;
+            const scaleFactor = outputCanvas.width / canvas.width;
             
-            // 绘制用户上传的图片（缩放到高分辨率）
             if (imageObj.complete && imageObj.naturalWidth > 0) { 
                 outputCtx.drawImage(
                     imageObj, 
@@ -430,10 +381,8 @@
                 );
             }
             
-            // 获取图像数据并打开新窗口
             const dataUrl = outputCanvas.toDataURL("image/png");
             
-            // 打开新窗口并显示结果
             const newWindow = window.open();
             newWindow.document.write(`
                 <!DOCTYPE html>
@@ -442,55 +391,31 @@
                     <meta charset="UTF-8">
                     <meta name="viewport" content="width=device-width, initial-scale=1.0">
                     <title>NJZ头像</title>
-                    <link rel="icon" href="favicon.ico" type="image/x-icon">
                     <style>
-                        @font-face {
-                            font-family: 'YaheiHeavy';
-                            src: url('yaheiheavy.woff2') format('woff2'),
-                                 url('yaheiheavy.woff') format('woff'),
-                                 url('yaheiheavy.ttf') format('truetype');
-                            font-weight: normal;
-                            font-style: normal;
-                        }
-                    
                         body {
-                            font-family: 'Arial', sans-serif;
-                            background-image: url('dreamscape-bg.jpg'); /* 新页面也使用相同背景 */
-                            background-size: cover;
-                            background-position: center;
-                            background-attachment: fixed;
-                            margin: 0;
-                            padding: 20px;
                             display: flex;
-                            flex-direction: column;
-                            align-items: center;
                             justify-content: center;
+                            align-items: center;
                             min-height: 100vh;
-                            text-align: center;
+                            margin: 0;
+                            background-color: #F4F6FA;
+                            font-family: 'Noto Sans SC', sans-serif;
                         }
                         .avatar-container {
-                            background-color: rgba(255, 255, 255, 0.85);
-                            padding: 25px;
-                            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
-                            max-width: 100%;
-                            border-radius: 15px;
-                            backdrop-filter: blur(8px);
-                            -webkit-backdrop-filter: blur(8px);
-                            margin: 20px;
+                            text-align: center;
+                            background-color: white;
+                            padding: 30px;
+                            border-radius: 16px;
+                            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
                         }
                         img {
                             max-width: 100%;
-                            height: auto;
-                            margin-bottom: 20px;
-                            border-radius: 5px;
-                            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                            max-height: 80vh;
+                            border-radius: 12px;
                         }
                         p {
-                            color: #333;
-                            margin-bottom: 20px;
-                            font-size: 18px;
-                            font-weight: bold;
-                            font-family: 'YaheiHeavy', 'Microsoft YaHei', sans-serif;
+                            margin-top: 15px;
+                            color: #666;
                         }
                     </style>
                 </head>
